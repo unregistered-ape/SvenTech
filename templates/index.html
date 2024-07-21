@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVE Online Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>EVE Online Authentication</h1>
+    <button onclick="window.location.href='/login'">Login with EVE Online</button>
+    <button onclick="window.location.href='/refresh_and_get_location'">Get Locations</button>
+    <br>
+    <br>
+    <button onclick="window.location.href='/desto'">Set Desto</button>
+    <h2>Authenticated Characters</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Character Name</th>
+                <th>Solar System Name</th>
+                <th>Structure Name</th>
+                <th>Ship Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for character in characters %}
+            <tr>
+                <td>{{ character[1] }}</td>
+                <td>{{ character[3] }}</td>
+                <td>{{ character[2]['solar_system_name'] if character[2] else 'Unknown' }}</td>
+                <td>{{ character[2]['structure_name'] if character[2] and character[2].get('structure_name') else 'N/A' }}</td>
+                <td><button onclick="launchCharacter('{{ character[1] }}')">Launch</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        function launchCharacter(characterName) {
+            fetch('/launch_character', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ character: characterName }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

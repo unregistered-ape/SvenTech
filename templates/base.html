@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=10">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="G. (Kyria) Bisch">
+
+    <title>Flask - EsiPy - Example</title>
+    <style>
+        .veles {
+            background-color: #06995c;
+            /* Green */
+            color: white;
+            padding: 1.2vw 1.5vw;
+        }
+
+        .svarog {
+            background-color: #e60f0f;
+            /* Green */
+            color: white;
+            padding: 1.1vw 1.5vw;
+        }
+
+        .perun {
+            background-color: #198cf8;
+            /* Green */
+            color: white;
+            padding: 1.2vw 1.8vw;
+        }
+
+        .grid {
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 0.6vw;
+            background-color: black;
+        }
+
+        button {
+            border-width: 0px;
+            margin: 0px;
+            padding-block: 0px;
+            padding-inline: 0px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 2vw;
+            width: 100%;
+        }
+
+        .returnButton {
+            background-color: #4CAF50;
+            color: white;
+            margin:  10px 10px;
+            padding: 10px 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            width: fit-content;
+        }
+        .returnButton:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            border-width: 0vw;
+            border-color: black;
+            border-style: solid;
+            margin: 0px;
+            border-spacing: 0.2vw;
+        }
+
+        td {
+            padding: 0px
+        }
+
+        .example {
+            width: 100vw;
+        }
+
+        .example::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            margin: 0px;
+        }
+
+        .authd {
+            margin: 1vw;
+            border-width: 0vw;
+            border-color: black;
+            border-style: solid;
+            margin: 0px;
+            border-spacing: 0.2vw;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="example">
+        <form action="/set_desto" method="post">
+            <table class="grid">
+                <tr>
+                    <td><button type="submit" name="button_value" value="30010141" class="perun">Sakenta</button></td>
+                    <td><button type="submit" name="button_value" value="30031392" class="perun">Komo</button></td>
+                    <td><button type="submit" name="button_value" value="30005005" class="perun">Ignebaener</button>
+                    </td>
+                    <td><button type="submit" name="button_value" value="30000157" class="perun">Otela</button></td>
+                    <td><button type="submit" name="button_value" value="30001445" class="perun">Nalvula</button></td>
+                    <td><button type="submit" name="button_value" value="30002737" class="perun">Konola</button></td>
+                    <td><button type="submit" name="button_value" value="30002079" class="perun">Krirald</button></td>
+                    <td><button type="submit" name="button_value" value="30000192" class="perun">Otanoumi</button></td>
+                </tr>
+                <tr>
+                    <td><button type="submit" name="button_value" value="30040141" class="svarog">Urhinichi</button>
+                    </td>
+                    <td><button type="submit" name="button_value" value="30001413" class="svarog">Nani</button></td>
+                    <td><button type="submit" name="button_value" value="30002411" class="svarog">Skarkon</button></td>
+                    <td><button type="submit" name="button_value" value="30003495" class="svarog">Raravoss</button></td>
+                    <td><button type="submit" name="button_value" value="30002225" class="svarog">Harva</button></td>
+                    <td><button type="submit" name="button_value" value="30002770" class="svarog">Tunudan</button></td>
+                    <td><button type="submit" name="button_value" value="30000021" class="svarog">Kuhara</button></td>
+                    <td><button type="submit" name="button_value" value="30045328" class="svarog">Ahtila</button></td>
+                </tr>
+                <tr>
+                    <td><button type="submit" name="button_value" value="30020141" class="veles">Senda</button></td>
+                    <td><button type="submit" name="button_value" value="30000206" class="veles">Wirashoda</button></td>
+                    <td><button type="submit" name="button_value" value="30002652" class="veles">Ala</button></td>
+                    <td><button type="submit" name="button_value" value="30005029" class="veles">Vale</button></td>
+                    <td><button type="submit" name="button_value" value="30003046" class="veles">Angymonne</button></td>
+                    <td><button type="submit" name="button_value" value="30045329" class="veles">Ichoriya</button></td>
+                    <td><button type="submit" name="button_value" value="30002797" class="veles">Kaunokka</button></td>
+                    <td><button type="submit" name="button_value" value="30001381" class="veles">Arvasares</button></td>
+                </tr>
+            </table>
+            <br>
+            <br>
+        </form>
+        <br>
+        <div class="authd">
+            <button class="returnButton" onclick="window.location.href='/'">Return to Locations Window</button>
+            <br>
+            <br>
+            <br>
+            <table style="margin: 10px; text-align: left;">
+                <thead>
+                    <tr>
+                        <th>Character Name</th>
+                        <th>Ship Type</th>
+                        <th>Solar System Name</th>
+                        <th>Structure Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for character in characters %}
+                    <tr>
+                        <td>{{ character[1] }}</td>
+                        <td>{{ character[3] }}</td>
+                        <td>{{ character[2]['solar_system_name'] if character[2] else 'Unknown' }}</td>
+                        <td>{{ character[2]['structure_name'] if character[2] and character[2].get('structure_name') else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
