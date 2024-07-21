@@ -4,7 +4,6 @@ import sqlite3
 import logging
 import subprocess
 from preston import Preston
-from flask import request, jsonify
 from datetime import datetime
 from flask import Flask, redirect, request, session, url_for, render_template, jsonify
 import asyncio

@@ -5,3 +5,4 @@ preston
 aiosqlite
 aiohttp
 asyncio
+flask[async]
