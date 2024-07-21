@@ -1,0 +1,7 @@
+requests_oauthlib
+flask
+pyautogui
+preston
+aiosqlite
+aiohttp
+asyncio

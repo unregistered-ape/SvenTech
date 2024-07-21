@@ -1,0 +1,7 @@
+{
+    "client_id": "bdf2c785576946238756536aaabc486c",
+    "client_secret": "chI2alVie82Vs2RfOQDkxkakiVzJbmLXF4nLf6Mc",
+    "redirect_uri": "http://localhost:5000/callback",
+    "scopes": "publicData esi-location.read_location.v1 esi-location.read_ship_type.v1 esi-universe.read_structures.v1 esi-ui.write_waypoint.v1",
+    "user_agent": "svenmherrmann@gmail.com"
+}
