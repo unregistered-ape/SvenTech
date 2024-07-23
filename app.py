@@ -19,8 +19,6 @@ with open('config.json') as config_file:
 
 app = Flask(__name__)
 
-
-
 preston = Preston(
     user_agent= config['user_agent'],
     client_id= config['client_id'],
