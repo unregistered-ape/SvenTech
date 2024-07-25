@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ISK per Hour Calculator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        width: 80%;
+        margin: auto;
+        overflow: hidden;
+      }
+      header {
+        background: #333;
+        color: #fff;
+        padding-top: 30px;
+        min-height: 70px;
+        border-bottom: #77d42a 3px solid;
+      }
+      header h1 {
+        text-align: center;
+        text-transform: uppercase;
+        margin: 0;
+        font-size: 24px;
+      }
+      form {
+        background: #fff;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+      input[type="submit"] {
+        display: inline-block;
+        background: #77d42a;
+        color: #fff;
+        padding: 10px 15px;
+        border: 0;
+        cursor: pointer;
+        text-transform: uppercase;
+      }
+      input[type="submit"]:hover {
+        background: #5cb811;
+      }
+      h2, h3 {
+        color: #333;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      ul li {
+        background: #fff;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <form method="post">
+        <textarea name="text_data" rows="10" placeholder="Enter data here..."></textarea><br>
+        <input type="submit" value="Calculate">
+      </form>
+      
+      <button class="returnButton" onclick="window.location.href='/'">Return to Locations Window</button>
+            
+      {% if result %}
+        <h2>Results</h2>
+        <h2>Total Isk: <strong>{{ "{:,}".format(result.totalisk) }} isk</strong></h2>
+        <h3>Sessions ISK per Hour:</h3>
+        <ul>
+          {% for session_start, session_end, isk_per_hour, total_isk in result.sessions %}
+            <li>
+              <strong>Session Start:</strong> {{ session_start }} <br>
+              <strong>Session End:</strong> {{ session_end }} <br>
+              <strong>ISK per Hour:</strong> {{ "{:,}".format(isk_per_hour) }} isk <br>
+              <strong>Total ISK:</strong> {{ "{:,}".format(total_isk) }} isk
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </body>
+</html>

@@ -9,6 +9,8 @@ from flask import Flask, redirect, request, session, url_for, render_template, j
 import asyncio
 import aiohttp
 from concurrent.futures import ProcessPoolExecutor
+from datetime import datetime, timedelta
+from collections import defaultdict
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -268,6 +270,70 @@ async def main(preston, system):
         async with session.post('https://esi.evetech.net/v2/ui/autopilot/waypoint/', headers=headers, params=test) as resp:
             print(resp.status)
             print(await resp.text())
+
+@app.route('/isk', methods=['GET', 'POST'])
+def isk():
+    result = None
+    if request.method == 'POST':
+        text_data = request.form['text_data']
+        result = calculate_isk_per_hour(text_data)
+        print(result)
+    return render_template('isk.html', result=result)
+
+def calculate_isk_per_hour(text_data):
+    lines = text_data.strip().split('\n')
+    data = []
+    total_isk = 0
+
+    for line in lines:
+        parts = line.split('\t')
+        date_str = parts[0]
+        amount_str = parts[2].replace(' ISK', '').replace(',', '')
+        date = datetime.strptime(date_str, "%Y.%m.%d %H:%M")
+        amount = int(amount_str) * 15  # Multiply by 15
+        data.append((date, amount))
+        total_isk = total_isk + amount
+
+    # Reverse the data to have the earliest date first
+    data.reverse()
+
+    sessions = []
+    session_start = data[0][0]
+    session_end = data[0][0]
+    session_isk = data[0][1]
+    session_time = 0
+    last_time = data[0][0]
+
+    for i in range(1, len(data)):
+        current_time = data[i][0]
+        time_diff = (current_time - last_time).total_seconds() / 3600  # time diff in hours
+
+        if time_diff <= 3:
+            session_isk += data[i][1]
+            session_time += time_diff
+            session_end = current_time
+        else:
+            if session_time > 0:
+                isk_per_hour = session_isk / session_time if session_time > 0 else 0
+                sessions.append((session_start, session_end, int(isk_per_hour), session_isk))
+                print({session_start, session_end, int(isk_per_hour), session_isk})
+            session_start = current_time
+            session_end = current_time
+            session_isk = data[i][1]
+            session_time = 0  # Reset session time for new session
+        
+        last_time = current_time
+
+    if session_time > 0:
+        isk_per_hour = session_isk / session_time if session_time > 0 else 0
+        sessions.append((session_start, session_end, int(isk_per_hour), session_isk))
+    
+    print(total_isk)
+
+    return {
+        'sessions': sessions,
+        'totalisk': total_isk
+    }
 
 if __name__ == "__main__":
     app.run(debug=True)
