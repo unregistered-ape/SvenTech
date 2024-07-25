@@ -11,7 +11,7 @@
         background-color: #f4f4f4;
       }
       .container {
-        width: 80%;
+        width: 940px;
         margin: auto;
         overflow: hidden;
       }
@@ -35,10 +35,12 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
       textarea {
+        box-sizing: border-box;
         width: 100%;
         padding: 10px;
         margin-bottom: 10px;
         font-size: 16px;
+        resize: none;
       }
       input[type="submit"] {
         display: inline-block;
@@ -65,32 +67,83 @@
         margin-bottom: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
+      button {
+            border-width: 0px;
+            margin: 0px;
+            padding-block: 0px;
+            padding-inline: 0px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 13px;
+            width: 100%;
+        }
+        input {
+            border-width: 0px;
+            margin: 0px;
+            padding-block: 0px;
+            padding-inline: 0px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 13px;
+            width: fit-content;
+        }
+        .returnButton {
+            background-color: #4CAF50;
+            color: white;
+            margin:  10px 10px;
+            padding: 10px 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            width: fit-content;
+        }
+        .returnButton:hover {
+            background-color: #45a049;
+        }
+        .session_container {
+          display: flex;
+          flex-wrap: wrap;
+          margin: 0px;
+          border: 1px Solid black;
+        }
+        .session {
+          box-sizing: border-box;
+          white-space: nowrap;  
+          width: fit-content;
+          background: #fff;
+          padding: 15px;
+          margin-bottom: 10px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          margin: 10px;
+        }
     </style>
   </head>
   <body>
     <div class="container">
+    <h1>ISK / HOUR Calculator</h1>
       <form method="post">
-        <textarea name="text_data" rows="10" placeholder="Enter data here..."></textarea><br>
+        <textarea name="text_data" rows="10" placeholder="Paste Wallet Logs Here..."></textarea><br>
         <input type="submit" value="Calculate">
-      </form>
-      
-      <button class="returnButton" onclick="window.location.href='/'">Return to Locations Window</button>
-            
+      </form>        
       {% if result %}
         <h2>Results</h2>
-        <h2>Total Isk: <strong>{{ "{:,}".format(result.totalisk) }} isk</strong></h2>
-        <h3>Sessions ISK per Hour:</h3>
-        <ul>
+        <h2>Total Isk Generated: <strong>{{ "{:,}".format(result.totalisk) }} isk</strong></h2>
+        <h3>Sessions</h3>
+        <div class="session_container">
           {% for session_start, session_end, isk_per_hour, total_isk in result.sessions %}
-            <li>
+            <div class="session">
               <strong>Session Start:</strong> {{ session_start }} <br>
-              <strong>Session End:</strong> {{ session_end }} <br>
-              <strong>ISK per Hour:</strong> {{ "{:,}".format(isk_per_hour) }} isk <br>
-              <strong>Total ISK:</strong> {{ "{:,}".format(total_isk) }} isk
-            </li>
+              <strong>Session Total:</strong> {{ (total_isk) }} Isk<br><br>
+              <strong>Isk/hour:</strong> {{ "{:,}".format(isk_per_hour) }} Isk 
+            </div>
           {% endfor %}
-        </ul>
+          </div>
       {% endif %}
+      
+      <button class="returnButton" onclick="window.location.href='/'">Home</button>
     </div>
+    
   </body>
 </html>

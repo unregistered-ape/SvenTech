@@ -278,6 +278,7 @@ def isk():
         text_data = request.form['text_data']
         result = calculate_isk_per_hour(text_data)
         print(result)
+    
     return render_template('isk.html', result=result)
 
 def calculate_isk_per_hour(text_data):
@@ -315,8 +316,8 @@ def calculate_isk_per_hour(text_data):
         else:
             if session_time > 0:
                 isk_per_hour = session_isk / session_time if session_time > 0 else 0
-                sessions.append((session_start, session_end, int(isk_per_hour), session_isk))
-                print({session_start, session_end, int(isk_per_hour), session_isk})
+                sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk)))
+                print({session_start, session_end, int(isk_per_hour), int(time_diff/3600)})
             session_start = current_time
             session_end = current_time
             session_isk = data[i][1]
@@ -326,7 +327,8 @@ def calculate_isk_per_hour(text_data):
 
     if session_time > 0:
         isk_per_hour = session_isk / session_time if session_time > 0 else 0
-        sessions.append((session_start, session_end, int(isk_per_hour), session_isk))
+        time_diff = 0
+        sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk)))
     
     print(total_isk)
 
@@ -334,6 +336,27 @@ def calculate_isk_per_hour(text_data):
         'sessions': sessions,
         'totalisk': total_isk
     }
+    
+def format_large_number(value):
+    # Define suffixes
+    suffixes = ['', 'K', 'M', 'B', 'T']
+    magnitude = 0
+    
+    # Convert the number to a float and keep reducing it by 1000 until it's less than 1000
+    while abs(value) >= 1000:
+        magnitude += 1
+        value /= 1000.0
+    
+    # Return the formatted number with the appropriate suffix
+    return f'{value:.2f}{suffixes[magnitude]}'
+
+@app.route('/get_wallet', methods=['GET', 'POST'])
+def get_wallet(refresh):
+    refresh = refresh
+    
+    preston = Preston(
+        
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
