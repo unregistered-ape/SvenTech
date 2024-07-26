@@ -273,32 +273,59 @@ async def main(preston, system):
 
 @app.route('/isk', methods=['GET', 'POST'])
 def isk():
-    result = None
-    if request.method == 'POST':
-        text_data = request.form['text_data']
-        result = calculate_isk_per_hour(text_data)
-        print(result)
     
-    return render_template('isk.html', result=result)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT character_name, character_id FROM characters')
+    characters = cursor.fetchall()
+    logging.debug(f'({characters})')
+    conn.close()
+    
+    result = None
+    transactions = None
+    if request.method == 'POST':
+        if 'text_data' in request.form:
+            text_data = request.form['text_data']
+            result = calculate_isk_per_hour(text_data, 'paste')
+        if 'get_wallet' in request.form:
+            selected_option = request.form.get('get_wallet')
+            transactions = get_wallet(int(selected_option))
+            result = calculate_isk_per_hour(transactions, 'esi')
+    
+    return render_template('isk.html', result=result, characters=characters, transactions = transactions)
 
-def calculate_isk_per_hour(text_data):
-    lines = text_data.strip().split('\n')
+def calculate_isk_per_hour(text_data, inputtype):
+    input_type = inputtype
     data = []
+    sessions = []
     total_isk = 0
+        
+    if input_type == 'paste':
+        lines = text_data.strip().split('\n')
 
-    for line in lines:
-        parts = line.split('\t')
-        date_str = parts[0]
-        amount_str = parts[2].replace(' ISK', '').replace(',', '')
-        date = datetime.strptime(date_str, "%Y.%m.%d %H:%M")
-        amount = int(amount_str) * 15  # Multiply by 15
-        data.append((date, amount))
-        total_isk = total_isk + amount
-
+        for line in lines:
+            parts = line.split('\t')
+            date_str = parts[0]
+            amount_str = parts[2].replace(' ISK', '').replace(',', '')
+            date = datetime.strptime(date_str, "%Y.%m.%d %H:%M")
+            amount = int(amount_str) * 15  # Multiply by 15
+            data.append((date, amount))
+            total_isk = total_isk + amount
+    if input_type == 'esi':
+        for entry in text_data:
+            amount = int(entry['amount']) * 15
+            total_isk = total_isk + amount
+            date = datetime.strptime(entry['date'], "%Y-%m-%dT%H:%M:%SZ")
+            data.append((date, amount))
+        if data == []:
+            return {
+                'sessions': sessions,
+                'totalisk': total_isk
+            }
+        
     # Reverse the data to have the earliest date first
     data.reverse()
-
-    sessions = []
+    
     session_start = data[0][0]
     session_end = data[0][0]
     session_isk = data[0][1]
@@ -350,13 +377,33 @@ def format_large_number(value):
     # Return the formatted number with the appropriate suffix
     return f'{value:.2f}{suffixes[magnitude]}'
 
-@app.route('/get_wallet', methods=['GET', 'POST'])
-def get_wallet(refresh):
-    refresh = refresh
-    
-    preston = Preston(
+def get_wallet(char_id):
+    character_id = char_id
+    pochticks = []
         
-    )
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT refresh_token FROM characters WHERE character_id = ?', (character_id,))
+    result = cursor.fetchone()
+    
+    
+    if result:
+        logging.debug(f'(found a matching character, pulling esi now)')
+        preston = Preston(
+                user_agent=config['user_agent'],
+                client_id=config['client_id'],
+                client_secret=config['client_secret'],
+                callback_url=config['redirect_uri'],
+                scope=config['scopes'],
+                refresh_token=result
+        )
+        transactions = preston.get_op('get_characters_character_id_wallet_journal', character_id = character_id)
+        for entry in transactions:
+            if 'The Convocation of Triglav rewarded' in entry['description']:
+                pochticks.append(entry)
+        
+        
+    return(pochticks)
 
 if __name__ == "__main__":
     app.run(debug=True)
