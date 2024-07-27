@@ -344,7 +344,6 @@ def calculate_isk_per_hour(text_data, inputtype):
             if session_time > 0:
                 isk_per_hour = session_isk / session_time if session_time > 0 else 0
                 sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk)))
-                print({session_start, session_end, int(isk_per_hour), int(time_diff/3600)})
             session_start = current_time
             session_end = current_time
             session_isk = data[i][1]
@@ -356,8 +355,6 @@ def calculate_isk_per_hour(text_data, inputtype):
         isk_per_hour = session_isk / session_time if session_time > 0 else 0
         time_diff = 0
         sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk)))
-    
-    print(total_isk)
 
     return {
         'sessions': sessions,
