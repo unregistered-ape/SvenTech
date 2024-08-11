@@ -330,7 +330,7 @@ def calculate_isk_per_hour(text_data, inputtype):
         'sessions': sessions,
         'totalisk': total_isk,
         'totalpayouts': total_sessions,
-        'totaltime': session_time
+        'totaltime': total_time
             }
         
     # Reverse the data to have the earliest date first
@@ -396,7 +396,7 @@ def calculate_isk_per_hour(text_data, inputtype):
         'sessions': sessions,
         'totalisk': format_large_number(total_isk),
         'totalpayouts': total_sessions,
-        'totaltime': total_time
+        'totaltime': round(total_time, 1)
     }
     
 def format_large_number(value):

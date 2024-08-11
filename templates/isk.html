@@ -165,9 +165,9 @@
         </div>
       {% endif %}
       {% if result %}
-        <h2>Results</h2>
         <h2>Total Isk Crabbed: <strong>{{ (result.totalisk) }} isk</strong></h2>
         <h2>Flashpoints Run: <strong>{{ result.totalpayouts }} </strong></h2>
+        <h2>Time Wasted: <strong>{{ result.totaltime }}H</strong></h2>
         <h3>Sessions</h3>
         <div class="session_container">
           {% for session_start, session_end, isk_per_hour, total_isk, session_length in result.sessions %}
