@@ -107,8 +107,7 @@
             background-color: #45a049;
         }
         .session_container {
-          display: flex;
-          flex-wrap: wrap;
+          display: grid;
           margin: 0px;
           border: 1px Solid black;
         }
@@ -120,10 +119,10 @@
         .session {
           box-sizing: border-box;
           white-space: nowrap;  
-          width: fit-content;
+          width: auto;
+          height: fit-content;
           background: #1f0074;
           padding: 15px;
-          margin-bottom: 10px;
           box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
           margin: 10px;
         }
@@ -134,7 +133,6 @@
           color: black;
           font-size: 12px;
           padding: 5px;
-          margin-bottom: 10px;
           box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
           margin: 5px;
         }
@@ -160,7 +158,7 @@
         <div class="transactions_container">
         {% for entry in transactions.pochticks %}
           <div class="transaction">
-            <strong>Date: </strong> {{ entry.date}}
+            <strong>Date: </strong> {{ entry.date }}
             <strong>Amount: </strong> {{ "{:,}".format(entry.amount) }}
           </div>
         {% endfor %}
@@ -168,14 +166,14 @@
       {% endif %}
       {% if result %}
         <h2>Results</h2>
-        <h2>Total Isk Crabbed: <strong>{{ "{:,}".format(result.totalisk) }} isk</strong></h2>
+        <h2>Total Isk Crabbed: <strong>{{ (result.totalisk) }} isk</strong></h2>
+        <h2>Flashpoints Run: <strong>{{ result.totalpayouts }} </strong></h2>
         <h3>Sessions</h3>
         <div class="session_container">
-          {% for session_start, session_end, isk_per_hour, total_isk in result.sessions %}
+          {% for session_start, session_end, isk_per_hour, total_isk, session_length in result.sessions %}
             <div class="session">
-              <strong>Session Start:</strong> {{ session_start }} <br>
-              <strong>Session Total:</strong> {{ (total_isk) }} Isk<br><br>
-              <strong>Isk/hour:</strong> {{ "{:,}".format(isk_per_hour) }} Isk 
+              <div>{{ (total_isk) }} Isk</span><span style="float: right;"> {{ "{:,}".format(isk_per_hour) }} Isk/h</div>
+              <div style="color: #00ccff; font-size: 14px; padding-top: 10px;">{{ session_length }} Hours  <span style="color: #757575; float: right;">{{ session_start }}</span></div>
             </div>
           {% endfor %}
           </div>

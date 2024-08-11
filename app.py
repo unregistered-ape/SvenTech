@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import sqlite3
 import logging
@@ -278,7 +279,6 @@ def isk():
     cursor = conn.cursor()
     cursor.execute('SELECT character_name, character_id FROM characters')
     characters = cursor.fetchall()
-    logging.debug(f'({characters})')
     conn.close()
     
     result = None
@@ -299,28 +299,38 @@ def calculate_isk_per_hour(text_data, inputtype):
     data = []
     sessions = []
     total_isk = 0
+    total_sessions = 0
+    total_time = 0
         
     if input_type == 'paste':
         lines = text_data.strip().split('\n')
 
         for line in lines:
             parts = line.split('\t')
-            date_str = parts[0]
-            amount_str = parts[2].replace(' ISK', '').replace(',', '')
-            date = datetime.strptime(date_str, "%Y.%m.%d %H:%M")
-            amount = int(amount_str) * 15  # Multiply by 15
-            data.append((date, amount))
-            total_isk = total_isk + amount
+            if 'The Convocation of Triglav rewarded' in parts[4]:
+                date_str = parts[0]
+                amount_str = parts[2].replace(' ISK', '').replace(',', '')
+                date = datetime.strptime(date_str, "%Y.%m.%d %H:%M")
+                amount = int(amount_str) * 15 * 0.92 # Multiply by 15
+                data.append((date, amount))
+                total_isk = total_isk + amount
+                total_sessions = total_sessions + 1
     if input_type == 'esi':
         for entry in text_data:
             amount = int(entry['amount']) * 15
             total_isk = total_isk + amount
-            date = datetime.strptime(entry['date'], "%Y-%m-%dT%H:%M:%SZ")
+            if amount > 150000000:
+                total_sessions = total_sessions + 1
+            pattern = r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):\d{2}Z"
+            formatted_date = re.sub(pattern, r"\1.\2.\3 \4:\5", entry['date'])
+            date = datetime.strptime(formatted_date, "%Y.%m.%d %H:%M")
             data.append((date, amount))
         if data == []:
             return {
-                'sessions': sessions,
-                'totalisk': total_isk
+        'sessions': sessions,
+        'totalisk': total_isk,
+        'totalpayouts': total_sessions,
+        'totaltime': session_time
             }
         
     # Reverse the data to have the earliest date first
@@ -330,35 +340,63 @@ def calculate_isk_per_hour(text_data, inputtype):
     session_end = data[0][0]
     session_isk = data[0][1]
     session_time = 0
-    last_time = data[0][0]
+    session_flashpoints = 1
+
+    if len(data) == 1:
+        session_time = 1
+        isk_per_hour = session_isk
+        sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk), round(session_time, 1)))
 
     for i in range(1, len(data)):
         current_time = data[i][0]
+        last_time = data[i-1][0]
         time_diff = (current_time - last_time).total_seconds() / 3600  # time diff in hours
 
         if time_diff <= 3:
             session_isk += data[i][1]
             session_time += time_diff
+            total_time += time_diff
+            session_flashpoints += 1
             session_end = current_time
+
+
         else:
             if session_time > 0:
                 isk_per_hour = session_isk / session_time if session_time > 0 else 0
-                sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk)))
+                if session_flashpoints == 2:
+                    isk_per_hour = session_isk / (session_time*2)
+                sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk), round(session_time, 1)))
+            if session_flashpoints == 1:
+                session_start = last_time
+                session_end = last_time
+                session_time = 0.2
+                session_isk = data[i-1][1]
+                isk_per_hour = session_isk
+                sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk), round(session_time, 1)))
             session_start = current_time
             session_end = current_time
             session_isk = data[i][1]
+            session_flashpoints = 1
             session_time = 0  # Reset session time for new session
-        
-        last_time = current_time
 
     if session_time > 0:
         isk_per_hour = session_isk / session_time if session_time > 0 else 0
+        if session_flashpoints == 2:
+            isk_per_hour = session_isk / (session_time*2)
         time_diff = 0
-        sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk)))
+        sessions.append((session_start, session_end, int(isk_per_hour), format_large_number(session_isk), round(session_time, 1)))
 
+
+    for i in sessions:
+        print(i[3])
+
+    
+    
     return {
         'sessions': sessions,
-        'totalisk': total_isk
+        'totalisk': format_large_number(total_isk),
+        'totalpayouts': total_sessions,
+        'totaltime': total_time
     }
     
 def format_large_number(value):
@@ -394,12 +432,15 @@ def get_wallet(char_id):
                 scope=config['scopes'],
                 refresh_token=result
         )
+        totalsites = 0
         transactions = preston.get_op('get_characters_character_id_wallet_journal', character_id = character_id)
         for entry in transactions:
             if 'The Convocation of Triglav rewarded' in entry['description']:
                 pochticks.append(entry)
+                totalsites = totalsites + 1
         
-        
+        logging.debug(f'(total sites transactions {totalsites})')
+        logging.debug(f'({pochticks[0]})')
     return(pochticks)
 
 if __name__ == "__main__":
